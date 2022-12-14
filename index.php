@@ -8,9 +8,6 @@
  * Author URI:        https://github.com/mahmutyukselmert/
 */
 
-/**
- * Custom script
- */
 function ajax_subscribe_scripts() {
     wp_enqueue_script( "ajax_subscribe", plugin_dir_url( __FILE__ ) . 'main.min.js', array( 'jquery' ) );
 
@@ -22,7 +19,7 @@ function ajax_subscribe_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'ajax_subscribe_scripts' );
 
-/// KARGOBUL NEWSLETTER AJAX ///
+/// NEWSLETTER AJAX ///
 function newsletter_ajax_subscribe() {
     check_ajax_referer( 'noncy_nonce', 'nonce' );
     $data = urldecode( $_POST['data'] );
@@ -100,4 +97,4 @@ function newsletter_ajax_subscribe() {
 
 add_action( 'wp_ajax_newsletter_ajax_subscribe', 'newsletter_ajax_subscribe' );
 add_action( 'wp_ajax_nopriv_newsletter_ajax_subscribe', 'newsletter_ajax_subscribe' );
-/// KARGOBUL NEWSLETTER AJAX ///
+/// NEWSLETTER AJAX ///
