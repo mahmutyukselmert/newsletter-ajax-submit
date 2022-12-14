@@ -17,15 +17,12 @@ jQuery(function($){
         $input = $this.find( 'input[name="ne"]'),
         $noti = $input.prev(),
         $submit = $this.find( 'input[type="submit"]'),
+
         success = function() {
             if($('.newsletter-alert').length > 0) {
-                $this.fadeOut('slow', function() {
-                    $('form.gdlr-core-newsletter-form .gdlr-core-newsletter-submit').after('<div class="alert alert-success p-2 mt-2 newsletter-alert">Başarılı bir şekilde abone oldunuz.</div>');
-                }); 
+                $('form.gdlr-core-newsletter-form .gdlr-core-newsletter-submit').after('<div class="alert alert-success p-2 mt-2 newsletter-alert">Başarılı bir şekilde abone oldunuz.</div>');
             } else {
-                $this.fadeOut('slow', function() {
-                    $('.newsletter-alert').text('Başarılı bir şekilde abone oldunuz.');
-                }); 
+                $('.newsletter-alert').text('Başarılı bir şekilde abone oldunuz.');
             }
         };
 
@@ -49,43 +46,27 @@ jQuery(function($){
                     url: ajax.url,
                     data: data,
                     beforeSend: function() {
-                        $input.prop( 'disabled', true );
-                        $submit.val('Gönderiliyor...').prop( 'disabled', true );
+                        //$input.prop( 'disabled', true );
+                        //$submit.val('Gönderiliyor...').prop( 'disabled', true );
                     },
                     success: function( data ) {
+                        console.log(data);
+                        console.log(data.status);
                         if( data.status == 'success' ) {
-                            success();
+                            //success();
+                            $('.newsletter-alert').remove();
+                            $('form.gdlr-core-newsletter-form .gdlr-core-newsletter-submit').after('<div class="alert alert-success p-2 mt-2 newsletter-alert">'+data.msg+'</div>');
                         } else {
-                            $input.prop( 'disabled', false );
-                            $submit.val('Submit').prop( 'disabled', false );
-
-                            if($('.newsletter-alert').length > 0) {
-                                $('form.gdlr-core-newsletter-form .gdlr-core-newsletter-submit').after('<div class="alert alert-danger p-2 mt-2 newsletter-alert">'+data.msg+'</div>');
-                            } else {
-                                if ( $('.newsletter-alert').hasClass('alert-success') ) {
-                                    $('.newsletter-alert').removeClass('alert-success');
-                                    $('.newsletter-alert').removeClass('alert-danger');
-                                    $('.newsletter-alert').text(data.msg);
-                                }else {
-                                    $('.newsletter-alert').text(data.msg);
-                                }
-                            }
-
+                            $('.newsletter-alert').remove();
+                            $('form.gdlr-core-newsletter-form .gdlr-core-newsletter-submit').after('<div class="alert alert-danger p-2 mt-2 newsletter-alert">'+data.msg+'</div>');
                         }
+                        $input.prop( 'disabled', false );
+                        $submit.val('Abone Ol').prop( 'disabled', false );
                     }
                 });
             } else {
-                if($('.newsletter-alert').length > 0) {
-                    $('form.gdlr-core-newsletter-form .gdlr-core-newsletter-submit').after('<div class="alert alert-danger p-2 mt-2 newsletter-alert">Lütfen geçerli bir e-posta adresi girin!</div>');
-                } else {
-                    if ($('.newsletter-alert').hasClass('alert-success')) {
-                        $('.newsletter-alert').removeClass('alert-success');
-                        $('.newsletter-alert').removeClass('alert-danger');
-                        $('.newsletter-alert').text('Lütfen geçerli bir e-posta adresi girin!');
-                    }else {
-                        $('.newsletter-alert').text('Lütfen geçerli bir e-posta adresi girin!');
-                    }
-                }
+                $('.newsletter-alert').remove();
+                $('form.gdlr-core-newsletter-form .gdlr-core-newsletter-submit').after('<div class="alert alert-danger p-2 mt-2 newsletter-alert">Lütfen geçerli bir e-posta adresi girin!</div>');
             };
         });
     });

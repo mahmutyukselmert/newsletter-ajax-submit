@@ -1,12 +1,11 @@
 <?php
 /*
  * Plugin Name:       Newsletter Ajax Submit
- * Plugin URI:        https:///kargobul.com.tr
  * Description:       Newsletter için Mahmut Yüksel Mert tarafından geliştirilmiş ajax ile abonelik gerçekleştirebilen eklenti.
  * Version:           1.0
  * Requires PHP:      7.4
  * Author:            Mahmut Yüksel MERT
- * Author URI:        https:///kargobul.com.tr
+ * Author URI:        https://github.com/mahmutyukselmert/
 */
 
 /**
@@ -44,7 +43,7 @@ function newsletter_ajax_subscribe() {
         
         /** @var int $count **/
         $count = $wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}newsletter WHERE email = %s", $fields['ne'] ) );
-        
+
         if( $count > 0 ) {
             $output = array(
                 'status'    => 'error',
@@ -63,32 +62,30 @@ function newsletter_ajax_subscribe() {
             /** @var string $token */
             $token =  wp_generate_password( rand( 10, 50 ), false );
 
-
-            $wpdb->insert( $wpdb->prefix . 'newsletter', array(
+            $insert = $wpdb->insert( $wpdb->prefix . 'newsletter', array(
                 'email'         => $fields['ne'],
-                'status'        => $fields['na'],
-                'http_referer'  => $fields['nhr'],
+                'status'        => 'C', //$fields['na'],
+                'ip'  => $_SERVER['REMOTE_ADDR'], //$fields['nhr'],
                 'token'         => $token,
-            )
-        );
+            ));
 
-            $opts = get_option('newsletter');
+            $newsletter = Newsletter::instance();
+            $user = NewsletterUsers::instance()->get_user( $wpdb->insert_id );
 
-            $opt_in = (int) $opts['noconfirmation'];
-
-            // This means that double opt in is enabled
-            // so we need to send activation e-mail
-            if ($opt_in == 0) {
-                $newsletter = Newsletter::instance();
-                $user = NewsletterUsers::instance()->get_user( $wpdb->insert_id );
-
-                NewsletterSubscription::instance()->mail($user->email, $newsletter->replace($opts['confirmation_subject'], $user), $newsletter->replace($opts['confirmation_message'], $user));
+            $mailSend = NewsletterSubscription::instance()->send_message('confirmation', $user, true);
+            if ($mailSend) {
+                $output = array(
+                    'status'    => 'success',
+                    'msg'       => __( 'Aboneliğiniz başarılı bir şekilde gerçekleşti. Abone olduğunuz için teşekkürler!', THEME_NAME )
+                );  
+            } else {
+                $output = array(
+                    'status'    => 'success',
+                    'msg'       => __( 'Aboneliğiniz başarılı bir şekilde gerçekleşti. Ancak e-posta göndeirlemedi Lütfen bunu site yöneticisine bildirin!', THEME_NAME )
+                );
             }
 
-            $output = array(
-                'status'    => 'success',
-                'msg'       => __( 'Aboneliğiniz başarılı bir şekilde gerçekleşti. Abone olduğunuz için teşekkürler!', THEME_NAME )
-            );  
+            
         }
         
     else :
@@ -99,7 +96,6 @@ function newsletter_ajax_subscribe() {
     endif;
     
     wp_send_json( $output );
-    die();
 }
 
 add_action( 'wp_ajax_newsletter_ajax_subscribe', 'newsletter_ajax_subscribe' );
